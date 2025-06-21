@@ -399,6 +399,7 @@ namespace FFXIV_TexTools.ViewModels
 
         #region Batch Operations
         public ICommand BatchExportHousingIndoorFurnitureCommand => new RelayCommand(BatchExportHousingIndoorFurniture);
+        public ICommand BatchExportHousingOutdoorFurnitureCommand => new RelayCommand(BatchExportHousingOutdoorFurniture);
         #endregion
 
         /// <summary>
@@ -543,7 +544,24 @@ namespace FFXIV_TexTools.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // Wrapper method calling shared logic
         private async void BatchExportHousingIndoorFurniture(object obj)
+        {
+            await BatchExportHousingFurniture("Indoor Furniture", "IndoorFurniture");
+        }
+
+        // Wrapper method calling shared logic
+        private async void BatchExportHousingOutdoorFurniture(object obj)
+        {
+            await BatchExportHousingFurniture("Outdoor Furniture", "OutdoorFurniture");
+        }
+
+        /// <summary>
+        /// Shared internal method that performs the batch export for housing furniture.
+        /// </summary>
+        /// <param name="secondaryCategoryName">The SecondaryCategory string to filter (e.g. "Indoor Furniture")</param>
+        /// <param name="exportFolderName">The folder name used under BatchExport (e.g. "IndoorFurniture")</param>
+        private async Task BatchExportHousingFurniture(string secondaryCategoryName, string exportFolderName)
         {
             var folderDialog = new FolderSelectDialog
             {
@@ -554,19 +572,19 @@ namespace FFXIV_TexTools.ViewModels
             bool? dialogResult;
             if (System.Windows.Application.Current.Dispatcher.CheckAccess())
             {
-                 dialogResult = folderDialog.ShowDialog(new WindowInteropHelper(_mainWindow).Handle);
+                dialogResult = folderDialog.ShowDialog(new WindowInteropHelper(_mainWindow).Handle);
             }
             else
             {
                 dialogResult = await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => folderDialog.ShowDialog(new WindowInteropHelper(_mainWindow).Handle));
             }
 
-
             if (dialogResult != true)
             {
                 await _mainWindow.ShowMessageAsync("Operation Cancelled", "Batch export was cancelled by the user.");
                 return;
             }
+
             string userSelectedBaseDir = folderDialog.FileName;
 
             ProgressDialogController progressController = null;
@@ -578,19 +596,18 @@ namespace FFXIV_TexTools.ViewModels
                 progressController.SetIndeterminate();
 
                 var housingCategoryProvider = new Housing();
-                
-                // Get all furniture items and filter for indoor furniture
+
+                // Get all furniture items and filter for the requested category
                 List<IItemModel> allFurniture = await housingCategoryProvider.GetUncachedFurnitureList(MainWindow.DefaultTransaction);
-               
-                const string IndoorFurnitureCategoryName = "Indoor Furniture";
+
                 List<IItemModel> itemsToExport = allFurniture.Where(item =>
                     item is XivFurniture furniture &&
-                    string.Equals(furniture.SecondaryCategory, IndoorFurnitureCategoryName, StringComparison.OrdinalIgnoreCase)).ToList();
+                    string.Equals(furniture.SecondaryCategory, secondaryCategoryName, StringComparison.OrdinalIgnoreCase)).ToList();
 
                 if (itemsToExport == null || !itemsToExport.Any())
                 {
                     if (progressController.IsOpen) await progressController.CloseAsync();
-                    await _mainWindow.ShowMessageAsync("No Items Found", "No indoor furniture items were found to export.");
+                    await _mainWindow.ShowMessageAsync("No Items Found", $"No {secondaryCategoryName.ToLowerInvariant()} items were found to export.");
                     return;
                 }
 
@@ -598,10 +615,9 @@ namespace FFXIV_TexTools.ViewModels
                 double currentItemCount = 0;
                 double totalItemCount = itemsToExport.Count;
                 progressController.SetProgress(0);
-                progressController.SetMessage("Preparing to export " + totalItemCount + " items...");
+                progressController.SetMessage($"Preparing to export {totalItemCount} items...");
 
-
-                await Task.Run(async () => // Run the loop on a background thread
+                await Task.Run(async () =>
                 {
                     foreach (IItemModel item in itemsToExport)
                     {
@@ -609,8 +625,8 @@ namespace FFXIV_TexTools.ViewModels
                         currentItemCount++;
                         string currentItemName = item.Name ?? "UnknownItem";
 
-						// Dispatcher needed for progress updates to UI thread
-						await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => {
+                        await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
                             progressController.SetMessage($"Processing item {currentItemCount} of {totalItemCount}: {currentItemName}");
                             progressController.SetProgress(currentItemCount / totalItemCount);
                         });
@@ -657,42 +673,38 @@ namespace FFXIV_TexTools.ViewModels
                                 }
 
                                 var modelExportSettings = new ModelExportSettings()
-                            {
-                                IncludeTextures = true,
-                                ShiftUVs = false,
-                                PbrTextures = false
-                            };
-
+                                {
+                                    IncludeTextures = true,
+                                    ShiftUVs = false,
+                                    PbrTextures = false
+                                };
 
                                 string itemNameSafe = SanitizePath(currentItemName);
-                                // Use current modelPath for the filename, not ttModel.Source, to be certain
                                 string modelFileName = Path.GetFileNameWithoutExtension(modelPath);
                                 string modelFileNameSafe = SanitizePath(modelFileName + ".fbx");
 
-                                // Export directory should be <UserSelectedDir>/BatchExport/IndoorFurniture/<ItemName>
-                                string itemExportDir = Path.Combine(userSelectedBaseDir, "BatchExport", "IndoorFurniture", itemNameSafe);
+                                string itemExportDir = Path.Combine(userSelectedBaseDir, "BatchExport", exportFolderName, itemNameSafe);
                                 Directory.CreateDirectory(itemExportDir);
                                 string exportPath = Path.Combine(itemExportDir, modelFileNameSafe);
 
-                                // This UI update should be fine here as it's within the Task.Run but dispatched.
-                                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => {
+                                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                                {
                                     progressController.SetMessage($"Exporting: {itemNameSafe} ({currentItemCount}/{totalItemCount})");
                                 });
                                 Trace.WriteLine($"Exporting model {modelPath} for item {itemNameSafe} to {exportPath}");
 
                                 await Mdl.ExportTTModelToFile(ttModel, exportPath, version, modelExportSettings, MainWindow.DefaultTransaction);
-                            } // End foreach modelPath
+                            }
                         }
                         catch (Exception ex)
                         {
-                            // This catch block is for errors during GetRoot, GetModelFiles, or general item processing before individual model export.
-                            _BatchExportErrors.Add($"Error processing item {currentItemName} (before model loop or if model loop itself failed): {ex.Message}");
+                            _BatchExportErrors.Add($"Error processing item {currentItemName}: {ex.Message}");
                             Trace.WriteLine($"Error processing item {currentItemName}: {ex.Message} - {ex.StackTrace}");
                         }
-                    } // End foreach item
-                }); // End Task.Run
+                    }
+                });
 
-                if (progressController.IsOpen) await progressController.CloseAsync(); // Ensure it's closed if open
+                if (progressController.IsOpen) await progressController.CloseAsync();
 
                 if (_BatchExportErrors.Any())
                 {
@@ -710,11 +722,11 @@ namespace FFXIV_TexTools.ViewModels
                 }
                 else if (progressController.IsCanceled)
                 {
-                     await _mainWindow.ShowMessageAsync("Operation Cancelled", "Batch export was cancelled by the user.");
+                    await _mainWindow.ShowMessageAsync("Operation Cancelled", "Batch export was cancelled by the user.");
                 }
                 else
                 {
-                    await _mainWindow.ShowMessageAsync("Export Complete", $"Successfully exported {Convert.ToInt32(totalItemCount - _BatchExportErrors.Count)} items to {Path.Combine(userSelectedBaseDir, "BatchExport", "IndoorFurniture")}");
+                    await _mainWindow.ShowMessageAsync("Export Complete", $"Successfully exported {Convert.ToInt32(totalItemCount - _BatchExportErrors.Count)} items to {Path.Combine(userSelectedBaseDir, "BatchExport", exportFolderName)}");
                 }
             }
             catch (Exception ex)
@@ -725,10 +737,10 @@ namespace FFXIV_TexTools.ViewModels
             }
             finally
             {
-                 if (progressController != null && progressController.IsOpen)
-                 {
-                     await progressController.CloseAsync();
-                 }
+                if (progressController != null && progressController.IsOpen)
+                {
+                    await progressController.CloseAsync();
+                }
             }
         }
 

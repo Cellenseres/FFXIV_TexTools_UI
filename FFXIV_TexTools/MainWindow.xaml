@@ -118,6 +118,7 @@
 
                 <MenuItem Header="Batch Operations">
                     <MenuItem Header="Batch Export Housing Indoor Furniture" Command="{Binding BatchExportHousingIndoorFurnitureCommand}"/>
+                    <MenuItem Header="Batch Export Housing Outdoor Furniture" Command="{Binding BatchExportHousingOutdoorFurnitureCommand}"/>
                 </MenuItem>
 
             </MenuItem>

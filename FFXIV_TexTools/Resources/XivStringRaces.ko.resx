@@ -117,4 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Aura_R" xml:space="preserve">
+    <value>아우라 렌</value>
+  </data>
+  <data name="Aura_X" xml:space="preserve">
+    <value>아우라 젤라</value>
+  </data>
+  <data name="Helion" xml:space="preserve">
+    <value>헬리온</value>
+  </data>
+  <data name="Hyur_H" xml:space="preserve">
+    <value>휴런: 고원 부족</value>
+  </data>
+  <data name="Hyur_M" xml:space="preserve">
+    <value>휴런: 중원 부족</value>
+  </data>
+  <data name="Lost" xml:space="preserve">
+    <value>로스트</value>
+  </data>
+  <data name="Raen" xml:space="preserve">
+    <value>렌</value>
+  </data>
+  <data name="Rava" xml:space="preserve">
+    <value>라바</value>
+  </data>
+  <data name="Veena" xml:space="preserve">
+    <value>비나</value>
+  </data>
+  <data name="Xaela" xml:space="preserve">
+    <value>젤라</value>
+  </data>
 </root>

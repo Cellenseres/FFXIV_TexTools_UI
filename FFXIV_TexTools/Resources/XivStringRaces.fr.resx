@@ -117,4 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Aura_R" xml:space="preserve">
+    <value>Ao Ra - Raen</value>
+  </data>
+  <data name="Aura_X" xml:space="preserve">
+    <value>Ao Ra - Xaela</value>
+  </data>
+  <data name="Helion" xml:space="preserve">
+    <value>Hélions</value>
+  </data>
+  <data name="Hyur_H" xml:space="preserve">
+    <value>Hyurgoths</value>
+  </data>
+  <data name="Hyur_M" xml:space="preserve">
+    <value>Hyurois</value>
+  </data>
+  <data name="Lost" xml:space="preserve">
+    <value>Égarés</value>
+  </data>
+  <data name="Raen" xml:space="preserve">
+    <value>Raen</value>
+  </data>
+  <data name="Rava" xml:space="preserve">
+    <value>Rava</value>
+  </data>
+  <data name="Veena" xml:space="preserve">
+    <value>Veena</value>
+  </data>
+  <data name="Xaela" xml:space="preserve">
+    <value>Xaela</value>
+  </data>
 </root>

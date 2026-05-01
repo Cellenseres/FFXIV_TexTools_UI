@@ -117,4 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Aura_R" xml:space="preserve">
+    <value>敖龍族 Raen</value>
+  </data>
+  <data name="Aura_X" xml:space="preserve">
+    <value>敖龍族 Xaela</value>
+  </data>
+  <data name="Helion" xml:space="preserve">
+    <value>Helion</value>
+  </data>
+  <data name="Hyur_H" xml:space="preserve">
+    <value>人族 高地之民</value>
+  </data>
+  <data name="Hyur_M" xml:space="preserve">
+    <value>人族 中原之民</value>
+  </data>
+  <data name="Lost" xml:space="preserve">
+    <value>Lost</value>
+  </data>
+  <data name="Raen" xml:space="preserve">
+    <value>Raen</value>
+  </data>
+  <data name="Rava" xml:space="preserve">
+    <value>Rava</value>
+  </data>
+  <data name="Veena" xml:space="preserve">
+    <value>Veena</value>
+  </data>
+  <data name="Xaela" xml:space="preserve">
+    <value>Xaela</value>
+  </data>
 </root>

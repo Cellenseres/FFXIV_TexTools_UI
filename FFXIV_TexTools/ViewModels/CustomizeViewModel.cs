@@ -613,7 +613,7 @@ namespace FFXIV_TexTools.ViewModels
                 }
                 catch
                 {
-                    return default(FrameworkSettings.EPenumbraRedrawMode).ToString();
+                    return default(FrameworkSettings).ToString();
                 }
             }
             set
@@ -994,9 +994,6 @@ namespace FFXIV_TexTools.ViewModels
         {
             Settings.Default.PenumbraRedrawMode = selectedMode;
             Settings.Default.Save();
-            if (Enum.TryParse<FrameworkSettings.EPenumbraRedrawMode>(selectedMode, out var mode))
-                XivCache.FrameworkSettings.PenumbraRedrawMode = mode;
-            NotifyPropertyChanged(nameof(SelectedPenumbraRedrawMode));
         }
 
         /// <summary>

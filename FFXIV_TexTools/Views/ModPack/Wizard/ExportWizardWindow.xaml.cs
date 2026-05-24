@@ -377,6 +377,10 @@ namespace FFXIV_TexTools.Views
                 var pmp = await PMP.LoadPMP(path, false, true);
                 TempFolder = pmp.path;
                 var data = await WizardData.FromPmp(pmp.pmp, pmp.path);
+                if (data.HasCombiningGroups)
+                {
+                    throw new NotSupportedException("Editing or re-exporting PMP files with Combining groups is not supported. Please import this modpack through the normal modpack import workflow.");
+                }
                 return data;
             });
         }
